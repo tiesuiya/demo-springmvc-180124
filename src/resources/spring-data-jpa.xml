@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/data/jpa
+       http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!--扫描配置文件-->
+    <context:property-placeholder location="classpath:config.properties"/>
+
+    <!-- 支持注解方式声明式事务 -->
+    <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>
+
+    <!-- 配置jpa(ps:之前一直报错，升级版本1.3到spring-data-jpa-1.10.1.RELEASE.jar，然后重新引用了一下jar包就好了) -->
+    <jpa:repositories base-package="org.lhpsn.demospringmvc.repository" repository-impl-postfix="Impl"
+                      entity-manager-factory-ref="entityManagerFactory" transaction-manager-ref="transactionManager"/>
+
+    <!-- 数据源 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close"
+          p:driverClass="${jdbc.driverClassName}"
+          p:jdbcUrl="${jdbc.url}"
+          p:user="${jdbc.username}"
+          p:password="${jdbc.password}"
+          p:testConnectionOnCheckout="${jdbc.c3p0.testConnectionOnCheckout}"
+          p:testConnectionOnCheckin="${jdbc.c3p0.testConnectionOnCheckin}"
+          p:idleConnectionTestPeriod="${jdbc.c3p0.idleConnectionTestPeriod}"
+          p:initialPoolSize="${jdbc.c3p0.initialPoolSize}"
+          p:minPoolSize="${jdbc.c3p0.minPoolSize}"
+          p:maxPoolSize="${jdbc.c3p0.maxPoolSize}"
+          p:maxIdleTime="${jdbc.c3p0.maxIdleTime}"/>
+
+
+    <!-- 实体管理器（感觉相当于sessionfactory） -->
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <!--数据源-->
+        <property name="dataSource" ref="dataSource"/>
+        <!--包扫描-->
+        <property name="packagesToScan" value="org.lhpsn.demospringmvc.bean"/>
+        <!--适配器-->
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+        </property>
+        <!--基本配置-->
+        <property name="jpaProperties">
+            <props>
+                <!--命名策略-->
+                <prop key="hibernate.ejb.naming_strategy">org.hibernate.cfg.ImprovedNamingStrategy</prop>
+                <!--基本配置-->
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.hbm2ddl.auto">none</prop>
+                <prop key="schemaUpdate">true</prop>
+                <!--二级缓存-->
+                <prop key="hibernate.cache.use_query_cache">true</prop>
+                <prop key="hibernate.cache.use_second_level_cache">true</prop>
+                <prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- 事务管理器 -->
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean>
+    <!-- 事务 -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="*"/>
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="find*" read-only="true"/>
+            <tx:method name="select*" read-only="true"/>
+            <tx:method name="delete*" propagation="REQUIRED"/>
+            <tx:method name="update*" propagation="REQUIRED"/>
+            <tx:method name="add*" propagation="REQUIRED"/>
+            <tx:method name="insert*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+    <!-- 事务入口 -->
+    <aop:config>
+        <aop:pointcut id="allServiceMethod" expression="execution(* org.lhpsn.demospringmvc.service..*(..))"/>
+        <aop:advisor pointcut-ref="allServiceMethod" advice-ref="txAdvice"/>
+    </aop:config>
+    <!-- 使用cglib进行动态代理 -->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+</beans>
