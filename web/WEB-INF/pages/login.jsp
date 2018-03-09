@@ -10,9 +10,9 @@
 <html>
 <head>
     <title>Title</title>
-    <script src="/resources/js/jquery_2.1.4.min.js"></script>
+    <script src="/public/js/jquery_2.1.4.min.js"></script>
 </head>
-<body style="background-image: url('http://img.zcool.cn/community/01826f5788901c0000012e7e8110fa.jpg@1280w_1l_2o_100sh.jpg');background-repeat: no-repeat;">
+<body style="background-image: url('http://img.zcool.cn/community/01826f5788901c0000012e7e8110fa.jpg@1280w_1l_2o_100sh.jpg');background-repeat: no-repeat;background-size: cover">
 <div id="loginContainer">
     <input type="text" id="userName" style="width:300px; height:30px;"/>
     <input type="password" id="passWord" style="width:300px; height:30px;"/>
