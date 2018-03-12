@@ -3,7 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          version="3.1">
-    <!--建立IoC容器体系-->
+    <!-- 建立Spring IoC容器体系 -->
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>classpath:spring.xml</param-value>
@@ -12,10 +12,11 @@
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
 
-    <!--建立Web请求转发器-->
+    <!-- 建立Spring MVC Web请求转发器 -->
     <servlet>
         <servlet-name>dispatcher</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <!-- 指定配置文件路径 -->
         <init-param>
             <param-name>contextConfigLocation</param-name>
             <param-value>classpath:spring-mvc.xml</param-value>
@@ -26,4 +27,9 @@
         <servlet-name>dispatcher</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
+
+    <!--
+        Spring容器配置时：contextConfigLocation不能乱写，不然容器会找默认配置文件，当然找不到
+        Spring MVC配置时：contextConfigLocation不能乱写，不然框架会找默认配置文件，当然找不到
+    -->
 </web-app>
